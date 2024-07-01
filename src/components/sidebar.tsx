@@ -10,16 +10,26 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <nav className='h-full py-4 pr-2 pl-4 min-w-64 flex flex-col'>
@@ -78,27 +88,44 @@ export default function Sidebar() {
         </div>
       </div>
       {/* Avatar */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className='bg-white p-4 hover:bg-gray-50 cursor-pointer border rounded-md'>
-            <div className='flex gap-2'>
-              <div className='flex justify-center items-center'>
-                <User className='w-5 h-5' />
-              </div>
-              <div>
-                <p className='text-xs font-medium'>Name</p>
-                <p className='text-xs truncate'>email@gmail.com</p>
+      <Dialog>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className='bg-white p-4 hover:bg-gray-50 cursor-pointer border rounded-md'>
+              <div className='flex gap-2'>
+                <div className='flex justify-center items-center'>
+                  <User className='w-5 h-5' />
+                </div>
+                <div>
+                  <p className='text-xs font-medium'>Name</p>
+                  <p className='text-xs truncate'>email@gmail.com</p>
+                </div>
               </div>
             </div>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className='w-56'>
-          <DropdownMenuItem>
-            <LogOut className='mr-2 h-4 w-4' />
-            <span>Log out</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className='w-56'>
+            <DialogTrigger asChild>
+              <DropdownMenuItem>
+                <LogOut className='mr-2 h-4 w-4' />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DialogTrigger>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure you want to log out?</DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type='button' variant='secondary'>
+                Close
+              </Button>
+            </DialogClose>
+            <Button onClick={() => router.push('/')}>Logout</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
