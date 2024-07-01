@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ClipboardList, GraduationCap, Users } from 'lucide-react';
+import Link from 'next/link';
+
 export default function DashboardPage() {
   return (
     <div className='flex flex-col h-full w-full gap-6'>
@@ -40,13 +42,17 @@ export default function DashboardPage() {
           <div className='border p-4 rounded-lg'>
             <div className='flex items-center justify-between'>
               <h3 className='font-semibold'>Applications</h3>
-              <Button variant='link'>See more</Button>
+              <Button variant='link' asChild>
+                <Link href='/dashboard/applications'>See more</Link>
+              </Button>
             </div>
           </div>
           <div className='border p-4 rounded-lg'>
             <div className='flex items-center justify-between'>
               <h3 className='font-semibold'>Notices</h3>
-              <Button variant='link'>See more</Button>
+              <Button variant='link' asChild>
+                <Link href='/dashboard/notices'>See more</Link>
+              </Button>
             </div>
           </div>
         </div>
