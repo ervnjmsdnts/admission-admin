@@ -14,13 +14,50 @@ import {
 } from '@/components/ui/table';
 import useDialog from '@/hooks/use-dialog';
 import usePagination from '@/hooks/use-pagination';
-import { SquarePen, Trash } from 'lucide-react';
+import { Loader2, Trash } from 'lucide-react';
 import AddNoticeDialog from './_components/add-notice';
+import { useEffect, useState } from 'react';
+import { Notice } from '@/lib/types';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function NoticesPage() {
-  const { currentItems, currentPage, paginate, totalPages } = usePagination([
-    '',
-  ]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchName, setSearchName] = useState('');
+
+  useEffect(() => {
+    (() => {
+      const noticeQuery = query(
+        collection(db, 'notices'),
+        where('isActive', '==', true),
+      );
+      const unsub = onSnapshot(noticeQuery, (snapshot) => {
+        const programs = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return { ...data, id: doc.id };
+        }) as Notice[];
+        const sortedNotices = programs.sort(
+          (a, b) => b.createdAt - a.createdAt,
+        );
+        setNotices(sortedNotices);
+        setIsLoading(false);
+      });
+
+      return () => {
+        unsub();
+      };
+    })();
+  }, []);
+
+  const filteredNotcies = searchName
+    ? notices.filter((p) =>
+        p.title.toLowerCase().includes(searchName.toLowerCase()),
+      )
+    : notices;
+
+  const { currentItems, currentPage, paginate, totalPages } =
+    usePagination(filteredNotcies);
 
   const {
     handleCloseDelete,
@@ -29,6 +66,7 @@ export default function NoticesPage() {
     handleOpenAdd,
     openAdd,
     handleCloseAdd,
+    handleDelete,
   } = useDialog();
 
   return (
@@ -37,60 +75,73 @@ export default function NoticesPage() {
       <DeleteDialog
         open={openDelete}
         onClose={handleCloseDelete}
-        handleDelete={() => {}}
+        handleDelete={() => handleDelete('notices', 'notice')}
         message='Do you want to remove this notice? Removing this notice cannot be undone.'
       />
       <div className='flex flex-col h-full w-full gap-4'>
-        <div className='flex flex-grow w-full h-full gap-2 flex-col'>
-          <div className='flex justify-between'>
-            <Input placeholder='Search by title' className='max-w-[340px]' />
-            <Button onClick={handleOpenAdd}>Add Notice</Button>
+        {isLoading ? (
+          <div className='flex items-center justify-center w-full h-full'>
+            <Loader2 className='w-6 h-6 animate-spin' />
           </div>
-          <div className='flex flex-col h-full'>
-            <div className='border rounded-lg w-full h-0 flex-grow overflow-y-auto'>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className='text-center'>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className='font-medium'>Sample notice</TableCell>
-                    <TableCell className='max-w-16 truncate'>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Aspernatur, nulla.
-                    </TableCell>
-                    <TableCell>
-                      <div className='flex gap-2 justify-center items-center'>
-                        <Button size='icon' variant='ghost'>
-                          <SquarePen className='w-4 h-4 text-blue-400' />
-                        </Button>
-                        <Button
-                          onClick={() => handleOpenDelete('')}
-                          size='icon'
-                          variant='ghost'>
-                          <Trash className='w-4 h-4 text-red-400' />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+        ) : (
+          <>
+            <div className='flex flex-grow w-full h-full gap-2 flex-col'>
+              <div className='flex justify-between'>
+                <Input
+                  placeholder='Search by title'
+                  className='max-w-[340px]'
+                  onChange={(e) => setSearchName(e.target.value)}
+                  value={searchName}
+                />
+                <Button onClick={handleOpenAdd}>Add Notice</Button>
+              </div>
+              <div className='flex flex-col h-full'>
+                <div className='border rounded-lg w-full h-0 flex-grow overflow-y-auto'>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className='text-center'>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {currentItems.map((notice) => (
+                        <TableRow key={notice.id}>
+                          <TableCell className='font-medium'>
+                            {notice.title}
+                          </TableCell>
+                          <TableCell className='max-w-16 truncate'>
+                            {notice.description}
+                          </TableCell>
+                          <TableCell>
+                            <div className='flex gap-2 justify-center items-center'>
+                              <Button
+                                onClick={() => handleOpenDelete(notice.id)}
+                                size='icon'
+                                variant='ghost'>
+                                <Trash className='w-4 h-4 text-red-400' />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Pagination */}
-        <div className='self-end'>
-          <Pagination
-            totalPages={totalPages}
-            paginate={paginate}
-            currentPage={currentPage}
-          />
-        </div>
+            {/* Pagination */}
+            <div className='self-end'>
+              <Pagination
+                totalPages={totalPages}
+                paginate={paginate}
+                currentPage={currentPage}
+              />
+            </div>
+          </>
+        )}
       </div>
     </>
   );

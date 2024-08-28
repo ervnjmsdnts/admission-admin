@@ -1,6 +1,6 @@
-// import { useToast } from '@/components/ui/use-toast';
-// import { db } from '@/lib/firebase';
-// import { deleteDoc, doc } from 'firebase/firestore';
+import { useToast } from '@/components/ui/use-toast';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -44,19 +44,19 @@ export default function useDialog<T>(): UseDialogHook<T> {
     setOpenDelete(true);
   };
 
-  // const { toast } = useToast();
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleDelete = async (dbName: string, name: string) => {
-    // const ref = doc(db, dbName, entityId);
-    // try {
-    //   await deleteDoc(ref);
-    //   handleCloseDelete();
-    //   toast({ title: `Deleted ${name}` });
-    //   router.refresh();
-    // } catch (_) {
-    //   toast({ title: `Deleting ${name} failed`, variant: 'destructive' });
-    // }
+    const ref = doc(db, dbName, entityId);
+    try {
+      await updateDoc(ref, { isActive: false });
+      handleCloseDelete();
+      toast({ title: `Deleted ${name}` });
+      router.refresh();
+    } catch (_) {
+      toast({ title: `Deleting ${name} failed`, variant: 'destructive' });
+    }
   };
 
   return {

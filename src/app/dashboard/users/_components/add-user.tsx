@@ -17,19 +17,25 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { addDoc, collection } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const schema = z.object({ name: z.string().min(1) });
+const schema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(1),
+  phoneNumber: z.string().min(1),
+});
 
 type Schema = z.infer<typeof schema>;
 
-export default function AddProgramDialog({
+export default function AddUserDialog({
   open,
   onClose,
 }: {
@@ -44,14 +50,21 @@ export default function AddProgramDialog({
   const onHandleSubmit = async (data: Schema) => {
     try {
       setIsLoading(true);
-      await addDoc(collection(db, 'programs'), {
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password,
+      );
+      await setDoc(doc(db, 'users', user.uid), {
+        ...data,
+        role: 'admin',
         createdAt: new Date().getTime(),
-        name: data.name,
+        isActive: true,
       });
       toast({
-        title: 'Successfully added program',
+        title: 'Successfully added user',
       });
-      form.reset({ name: '' });
+      form.reset();
       onClose();
     } catch (error) {
       toast({ variant: 'destructive', title: (error as Error).message });
@@ -64,7 +77,7 @@ export default function AddProgramDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Program</DialogTitle>
+          <DialogTitle>Add User(Admin)</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -72,12 +85,48 @@ export default function AddProgramDialog({
             onSubmit={form.handleSubmit(onHandleSubmit)}>
             <FormField
               control={form.control}
+              name='email'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input {...field} type='email' />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input {...field} type='password' />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name='name'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder='Program name...' />
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='phoneNumber'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
                   </FormControl>
                 </FormItem>
               )}

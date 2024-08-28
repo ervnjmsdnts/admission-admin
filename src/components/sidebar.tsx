@@ -26,15 +26,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
+import { User as UserType } from '@/lib/types';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import Image from 'next/image';
 
-export default function Sidebar() {
+export default function Sidebar({ user }: { user: UserType }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+
+    await fetch('/api/logout');
+
+    localStorage.removeItem('user_id');
+
+    router.replace('/');
+  };
 
   return (
     <nav className='h-full py-4 pr-2 pl-4 min-w-64 flex flex-col'>
       <div className='flex-grow'>
-        <div className='flex justify-center'>
+        <div className='flex items-center w-full flex-col'>
+          <Image
+            src='/mindoro-school-logo.png'
+            width={64}
+            height={64}
+            alt='logo'
+          />
           <p className='font-semibold text-lg'>
             Welcome <span className='text-primary'>Admin</span>
           </p>
@@ -97,8 +117,8 @@ export default function Sidebar() {
                   <User className='w-5 h-5' />
                 </div>
                 <div>
-                  <p className='text-xs font-medium'>Name</p>
-                  <p className='text-xs truncate'>email@gmail.com</p>
+                  <p className='text-xs font-medium'>{user.name}</p>
+                  <p className='text-xs truncate'>{user.email}</p>
                 </div>
               </div>
             </div>
@@ -122,7 +142,7 @@ export default function Sidebar() {
                 Close
               </Button>
             </DialogClose>
-            <Button onClick={() => router.push('/')}>Logout</Button>
+            <Button onClick={handleLogout}>Logout</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
