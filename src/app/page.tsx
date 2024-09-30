@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,7 +31,6 @@ type Schema = z.infer<typeof schema>;
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
   const form = useForm<Schema>({ resolver: zodResolver(schema) });
   const { toast } = useToast();
 
@@ -65,7 +63,7 @@ export default function Home() {
 
       localStorage.setItem('user_id', user.uid);
 
-      router.push('/dashboard');
+      window.location.reload();
     } catch (error) {
       toast({ variant: 'destructive', title: (error as Error).message });
     } finally {

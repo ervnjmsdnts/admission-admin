@@ -68,7 +68,6 @@ export default function ApplicationsPage() {
       const admissions = await Promise.all(
         snapshot.docs.map(async (doc) => {
           const data = doc.data();
-          console.log({ data });
           const user = await fetchUser(data.userId);
           return { ...data, id: doc.id, user } as AdmissionUser;
         }),
@@ -104,12 +103,12 @@ export default function ApplicationsPage() {
       <ApproveDialog
         open={dialogType === 'approve'}
         onClose={closeDialog}
-        admissionId={selectedAdmission.id}
+        admission={selectedAdmission}
       />
       <RejectDialog
         open={dialogType === 'reject'}
         onClose={closeDialog}
-        admissionId={selectedAdmission.id}
+        admission={selectedAdmission}
       />
       <div className='flex flex-col h-full w-full gap-4'>
         {isLoading ? (
