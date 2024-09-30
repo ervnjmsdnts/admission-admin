@@ -86,7 +86,7 @@ export default function Home() {
                 alt='logo'
               />
               <h2 className='text-center text-xl font-semibold text-primary'>
-                Admin Login
+                Admin Logins
               </h2>
             </div>
             <div className='grid mt-4 gap-3'>
