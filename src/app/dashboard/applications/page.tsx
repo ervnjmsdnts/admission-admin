@@ -219,17 +219,15 @@ export default function ApplicationsPage() {
                                 <Check className='w-4 h-4 text-primary' />
                               </Button>
                             ) : null}
-                            {admission.status === 'forReview' ||
-                              (admission.status === 'completeExamination' && (
-                                <Button
-                                  onClick={() =>
-                                    openDialog('reject', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <X className='w-4 h-4 text-red-400' />
-                                </Button>
-                              ))}
+                            {(admission.status === 'forReview' ||
+                              admission.status === 'completeExamination') && (
+                              <Button
+                                onClick={() => openDialog('reject', admission)}
+                                size='icon'
+                                variant='ghost'>
+                                <X className='w-4 h-4 text-red-400' />
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
