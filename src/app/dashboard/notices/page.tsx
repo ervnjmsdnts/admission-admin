@@ -1,7 +1,6 @@
 'use client';
 import DeleteDialog from '@/components/delete-dialog';
 import Pagination from '@/components/pagination';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

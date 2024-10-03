@@ -5,6 +5,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   LogOut,
+  Newspaper,
   Presentation,
   User,
   Users,
@@ -100,6 +101,16 @@ export default function Sidebar({ user }: { user: UserType }) {
             variant={pathname === '/dashboard/notices' ? 'outline' : 'ghost'}>
             <Link href='/dashboard/notices'>
               <Presentation className='mr-2 h-4 w-4' /> Public Notices
+            </Link>
+          </Button>
+          <Button
+            className='justify-start'
+            asChild
+            variant={
+              pathname === '/dashboard/examinations' ? 'outline' : 'ghost'
+            }>
+            <Link href='/dashboard/examinations'>
+              <Newspaper className='mr-2 h-4 w-4' /> Examinations
             </Link>
           </Button>
           {/* <p className='text-xs pl-1 py-3 font-medium text-gray-400 uppercase'>

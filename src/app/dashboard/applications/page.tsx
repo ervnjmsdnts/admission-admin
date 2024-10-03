@@ -15,15 +15,16 @@ import usePagination from '@/hooks/use-pagination';
 import { db } from '@/lib/firebase';
 import { AdmissionUser, User } from '@/lib/types';
 import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { Check, Loader2, X } from 'lucide-react';
+import { Check, Loader2, Newspaper, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import ApproveDialog from './_components/approve';
 import RejectDialog from './_components/reject';
 import AdmissionContent from './_components/admission-content';
+import ExaminationDialog from './_components/examination';
 
-type DialogType = 'approve' | 'reject' | 'admission' | null;
+type DialogType = 'approve' | 'reject' | 'admission' | 'exam' | null;
 
 export default function ApplicationsPage() {
   const [admissions, setAdmissions] = useState<AdmissionUser[]>([]);
@@ -100,6 +101,11 @@ export default function ApplicationsPage() {
         onClose={closeDialog}
         admission={selectedAdmission}
       />
+      <ExaminationDialog
+        open={dialogType === 'exam'}
+        onClose={closeDialog}
+        admission={selectedAdmission}
+      />
       <ApproveDialog
         open={dialogType === 'approve'}
         onClose={closeDialog}
@@ -134,6 +140,8 @@ export default function ApplicationsPage() {
                         <TableHead>Status</TableHead>
                         <TableHead>Application</TableHead>
                         <TableHead>Student Name</TableHead>
+                        <TableHead>Examination Schedule</TableHead>
+                        <TableHead>Examination Completion Date</TableHead>
                         <TableHead>Created At</TableHead>
                         <TableHead className='text-center'>Actions</TableHead>
                       </TableRow>
@@ -146,12 +154,20 @@ export default function ApplicationsPage() {
                               variant={
                                 admission.status === 'forReview'
                                   ? 'pending'
+                                  : admission.status === 'onGoingExamination'
+                                  ? 'onGoing'
+                                  : admission.status === 'completeExamination'
+                                  ? 'complete'
                                   : admission.status === 'approved'
                                   ? 'default'
                                   : 'destructive'
                               }>
                               {admission.status === 'forReview'
                                 ? 'For Review'
+                                : admission.status === 'onGoingExamination'
+                                ? 'On Going Exam'
+                                : admission.status === 'completeExamination'
+                                ? 'Exam Complete'
                                 : admission.status.charAt(0).toUpperCase() +
                                   admission.status.slice(1)}
                             </Badge>
@@ -165,19 +181,46 @@ export default function ApplicationsPage() {
                           </TableCell>
                           <TableCell>{admission.user.name}</TableCell>
                           <TableCell>
+                            {admission.examination &&
+                            admission.examination.scheduleDate
+                              ? format(
+                                  new Date(admission.examination.scheduleDate),
+                                  'PPp',
+                                )
+                              : ''}
+                          </TableCell>
+                          <TableCell>
+                            {admission.examination &&
+                            admission.examination.completeExamDate
+                              ? format(
+                                  new Date(
+                                    admission.examination.completeExamDate,
+                                  ),
+                                  'PPp',
+                                )
+                              : ''}
+                          </TableCell>
+                          <TableCell>
                             {format(new Date(admission.createdAt), 'PPpp')}
                           </TableCell>
                           <TableCell className='flex justify-center'>
-                            {admission.status === 'forReview' && (
-                              <>
-                                <Button
-                                  onClick={() =>
-                                    openDialog('approve', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <Check className='w-4 h-4 text-primary' />
-                                </Button>
+                            {admission.status === 'forReview' ? (
+                              <Button
+                                onClick={() => openDialog('exam', admission)}
+                                size='icon'
+                                variant='ghost'>
+                                <Newspaper className='w-4 h-4 text-primary' />
+                              </Button>
+                            ) : admission.status === 'completeExamination' ? (
+                              <Button
+                                onClick={() => openDialog('approve', admission)}
+                                size='icon'
+                                variant='ghost'>
+                                <Check className='w-4 h-4 text-primary' />
+                              </Button>
+                            ) : null}
+                            {admission.status === 'forReview' ||
+                              (admission.status === 'completeExamination' && (
                                 <Button
                                   onClick={() =>
                                     openDialog('reject', admission)
@@ -186,8 +229,7 @@ export default function ApplicationsPage() {
                                   variant='ghost'>
                                   <X className='w-4 h-4 text-red-400' />
                                 </Button>
-                              </>
-                            )}
+                              ))}
                           </TableCell>
                         </TableRow>
                       ))}
