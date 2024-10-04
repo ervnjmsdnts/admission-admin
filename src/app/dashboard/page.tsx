@@ -199,12 +199,21 @@ export default function DashboardPage() {
                   <div
                     key={admission.id}
                     className='border p-4 rounded-md flex items-center justify-between'>
-                    <p>
-                      By{' '}
-                      <span className='font-semibold'>
-                        {admission.user.name}
-                      </span>
-                    </p>
+                    <div>
+                      <p>
+                        By{' '}
+                        <span className='font-semibold'>
+                          {admission.user.name}
+                        </span>
+                      </p>
+                      <p className='text-muted-foreground text-xs'>
+                        {admission.user.type === 'new'
+                          ? 'New Student'
+                          : admission.user.type === 'returning'
+                          ? 'Returning Student'
+                          : 'Transferee'}
+                      </p>
+                    </div>
                     <div>
                       <p className='text-sm'>
                         {format(new Date(admission.createdAt), 'PP')}

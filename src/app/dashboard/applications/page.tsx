@@ -140,6 +140,7 @@ export default function ApplicationsPage() {
                         <TableHead>Status</TableHead>
                         <TableHead>Application</TableHead>
                         <TableHead>Student Name</TableHead>
+                        <TableHead>Student Type</TableHead>
                         <TableHead>Examination Schedule</TableHead>
                         <TableHead>Examination Completion Date</TableHead>
                         <TableHead>Created At</TableHead>
@@ -180,6 +181,13 @@ export default function ApplicationsPage() {
                             </Button>
                           </TableCell>
                           <TableCell>{admission.user.name}</TableCell>
+                          <TableCell>
+                            {admission.user.type === 'new'
+                              ? 'New Student'
+                              : admission.user.type === 'returning'
+                              ? 'Returning Student'
+                              : 'Transferee'}
+                          </TableCell>
                           <TableCell>
                             {admission.examination &&
                             admission.examination.scheduleDate

@@ -105,6 +105,7 @@ export type User = {
   password: string;
   role: 'user' | 'admin';
   phoneNumber: string;
+  type?: 'new' | 'returning' | 'transferee';
 };
 
 type ParsedInputs = {

@@ -82,6 +82,7 @@ export default function UsersPage() {
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Phone Number</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Role</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -105,8 +106,19 @@ export default function UsersPage() {
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.phoneNumber}</TableCell>
                           <TableCell>
-                            {user.role.charAt(0).toUpperCase() +
-                              user.role.slice(1)}
+                            {user.type === 'new'
+                              ? 'New Student'
+                              : user.type === 'returning'
+                              ? 'Returning Student'
+                              : user.type === 'transferee'
+                              ? 'Transferee'
+                              : ''}
+                          </TableCell>
+                          <TableCell>
+                            {user.role === 'user'
+                              ? 'Student'
+                              : user.role.charAt(0).toUpperCase() +
+                                user.role.slice(1)}
                           </TableCell>
                         </TableRow>
                       ))}
