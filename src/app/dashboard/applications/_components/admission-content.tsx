@@ -55,7 +55,12 @@ export default function AdmissionContent({
             <div className='flex justify-between items-center'>
               <h3 className='font-medium'>Date of Birth</h3>
               <div className='flex gap-1'>
-                <p>{format(new Date(admission.form.dateOfBirth), 'PPP')}</p>
+                <p>
+                  {format(
+                    new Date(admission.form.dateOfBirth),
+                    'MMMM dd, yyyy',
+                  )}
+                </p>
               </div>
             </div>
             <div className='flex justify-between items-center'>
