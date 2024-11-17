@@ -23,8 +23,17 @@ import ApproveDialog from './_components/approve';
 import RejectDialog from './_components/reject';
 import AdmissionContent from './_components/admission-content';
 import ExaminationDialog from './_components/examination';
+import ApproveExamDialog from './_components/approve-exam';
+import RejectExamDialog from './_components/reject-exam';
 
-type DialogType = 'approve' | 'reject' | 'admission' | 'exam' | null;
+type DialogType =
+  | 'approve'
+  | 'reject'
+  | 'admission'
+  | 'exam'
+  | 'approveExam'
+  | 'rejectExam'
+  | null;
 
 export default function ApplicationsPage() {
   const [admissions, setAdmissions] = useState<AdmissionUser[]>([]);
@@ -96,6 +105,16 @@ export default function ApplicationsPage() {
 
   return (
     <>
+      <RejectExamDialog
+        open={dialogType === 'rejectExam'}
+        onClose={closeDialog}
+        admission={selectedAdmission}
+      />
+      <ApproveExamDialog
+        open={dialogType === 'approveExam'}
+        onClose={closeDialog}
+        admission={selectedAdmission}
+      />
       <AdmissionContent
         open={dialogType === 'admission'}
         onClose={closeDialog}
@@ -161,6 +180,8 @@ export default function ApplicationsPage() {
                                   ? 'complete'
                                   : admission.status === 'approved'
                                   ? 'default'
+                                  : admission.status === 'approvedExamination'
+                                  ? 'complete'
                                   : 'destructive'
                               }>
                               {admission.status === 'forReview'
@@ -169,6 +190,10 @@ export default function ApplicationsPage() {
                                 ? 'On Going Exam'
                                 : admission.status === 'completeExamination'
                                 ? 'Exam Complete'
+                                : admission.status === 'approvedExamination'
+                                ? 'Exam Passed'
+                                : admission.status === 'rejectedExamination'
+                                ? 'Exam Unsuccessful'
                                 : admission.status.charAt(0).toUpperCase() +
                                   admission.status.slice(1)}
                             </Badge>
@@ -213,29 +238,61 @@ export default function ApplicationsPage() {
                           </TableCell>
                           <TableCell className='flex justify-center'>
                             {admission.status === 'forReview' ? (
-                              <Button
-                                onClick={() => openDialog('exam', admission)}
-                                size='icon'
-                                variant='ghost'>
-                                <Newspaper className='w-4 h-4 text-primary' />
-                              </Button>
+                              <>
+                                <Button
+                                  onClick={() => openDialog('exam', admission)}
+                                  size='icon'
+                                  variant='ghost'>
+                                  <Newspaper className='w-4 h-4 text-primary' />
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    openDialog('reject', admission)
+                                  }
+                                  size='icon'
+                                  variant='ghost'>
+                                  <X className='w-4 h-4 text-red-400' />
+                                </Button>
+                              </>
                             ) : admission.status === 'completeExamination' ? (
-                              <Button
-                                onClick={() => openDialog('approve', admission)}
-                                size='icon'
-                                variant='ghost'>
-                                <Check className='w-4 h-4 text-primary' />
-                              </Button>
+                              <>
+                                <Button
+                                  onClick={() =>
+                                    openDialog('approveExam', admission)
+                                  }
+                                  size='icon'
+                                  variant='ghost'>
+                                  <Check className='w-4 h-4 text-primary' />
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    openDialog('rejectExam', admission)
+                                  }
+                                  size='icon'
+                                  variant='ghost'>
+                                  <X className='w-4 h-4 text-red-400' />
+                                </Button>
+                              </>
+                            ) : admission.status === 'approvedExamination' ? (
+                              <>
+                                <Button
+                                  onClick={() =>
+                                    openDialog('approve', admission)
+                                  }
+                                  size='icon'
+                                  variant='ghost'>
+                                  <Check className='w-4 h-4 text-primary' />
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    openDialog('reject', admission)
+                                  }
+                                  size='icon'
+                                  variant='ghost'>
+                                  <X className='w-4 h-4 text-red-400' />
+                                </Button>
+                              </>
                             ) : null}
-                            {(admission.status === 'forReview' ||
-                              admission.status === 'completeExamination') && (
-                              <Button
-                                onClick={() => openDialog('reject', admission)}
-                                size='icon'
-                                variant='ghost'>
-                                <X className='w-4 h-4 text-red-400' />
-                              </Button>
-                            )}
                           </TableCell>
                         </TableRow>
                       ))}
