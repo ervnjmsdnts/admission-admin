@@ -18,10 +18,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { db } from '@/lib/firebase';
+import { Notice } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -35,26 +36,48 @@ type Schema = z.infer<typeof schema>;
 export default function AddNoticeDialog({
   open,
   onClose,
+  notice,
 }: {
   open: boolean;
   onClose: () => void;
+  notice: Notice | null;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<Schema>({ resolver: zodResolver(schema) });
+  const form = useForm<Schema>({
+    resolver: zodResolver(schema),
+    values: useMemo(
+      () => ({
+        description: notice ? notice.description : '',
+        title: notice ? notice.title : '',
+      }),
+      [notice],
+    ),
+  });
 
   const { toast } = useToast();
 
   const onHandleSubmit = async (data: Schema) => {
     try {
       setIsLoading(true);
-      await addDoc(collection(db, 'notices'), {
-        createdAt: new Date().getTime(),
-        isActive: true,
-        ...data,
-      });
-      toast({
-        title: 'Successfully added notice',
-      });
+      if (notice) {
+        const docRef = doc(db, 'notices', `${notice.id}`);
+        await updateDoc(docRef, {
+          title: data.title,
+          description: data.description,
+        });
+        toast({
+          title: 'Successfully updated notice',
+        });
+      } else {
+        await addDoc(collection(db, 'notices'), {
+          createdAt: new Date().getTime(),
+          isActive: true,
+          ...data,
+        });
+        toast({
+          title: 'Successfully added notice',
+        });
+      }
       form.reset();
       onClose();
     } catch (error) {
@@ -68,7 +91,7 @@ export default function AddNoticeDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Notice</DialogTitle>
+          <DialogTitle>{notice ? 'Edit' : 'Add'} Notice</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form

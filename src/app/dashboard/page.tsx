@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { db } from '@/lib/firebase';
-import { AdmissionUser, User } from '@/lib/types';
+import { AdmissionUser, ChartType, Status, User } from '@/lib/types';
 import { format } from 'date-fns';
 import {
   collection,
@@ -17,7 +17,8 @@ import {
 } from 'firebase/firestore';
 import { ClipboardList, GraduationCap, Loader2, Users } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import MainChart from './applications/_components/main-chart';
 
 export default function DashboardPage() {
   const [programsCount, setProgramsCount] = useState(0);
@@ -133,8 +134,44 @@ export default function DashboardPage() {
     };
   }, []);
 
+  const chartAdmissions = useMemo(() => {
+    const record = admissions.reduce<Record<Status, ChartType>>(
+      (acc, item) => {
+        if (!acc[item.status]) {
+          acc[item.status] = {
+            name: item.status,
+            value: 0,
+          };
+        }
+
+        acc[item.status].value += 1;
+
+        return acc;
+      },
+      {
+        forReview: { name: 'forReview', value: 0 },
+        rejected: { name: 'rejected', value: 0 },
+        approved: { name: 'approved', value: 0 },
+        onGoingExamination: { name: 'onGoingExamination', value: 0 },
+        approvedExamination: { name: 'approvedExamination', value: 0 },
+        rejectedExamination: { name: 'rejectedExamination', value: 0 },
+      },
+    );
+
+    record.approved.fill = 'var(--color-approved)';
+    record.approvedExamination.fill = 'var(--color-approvedExamination)';
+    record.forReview.fill = 'var(--color-forReview)';
+    record.onGoingExamination.fill = 'var(--color-onGoingExamination)';
+    record.rejected.fill = 'var(--color-rejected)';
+    record.rejectedExamination.fill = 'var(--color-rejectedExamination)';
+
+    const data = Object.values(record);
+
+    return data;
+  }, [admissions]);
+
   return (
-    <div className='flex flex-col h-full w-full gap-6'>
+    <div className='flex flex-col h-full flex-grow w-full gap-4'>
       <div className='grid grid-cols-3 gap-4'>
         <Card>
           <CardHeader className='pb-2 flex-row items-center gap-4'>
@@ -180,9 +217,9 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <div className='flex flex-grow h-full w-full'>
+      <div className='flex h-full w-full'>
         <div className='grid grid-cols-2 w-full gap-4'>
-          <div className='border p-4 rounded-lg'>
+          <div className='border p-4 rounded-lg flex flex-col h-full'>
             <div className='flex items-center justify-between'>
               <h3 className='font-semibold'>Applications</h3>
               <Button variant='link' asChild>
@@ -194,7 +231,7 @@ export default function DashboardPage() {
                 <Loader2 className='w-6 h-6 animate-spin' />
               </div>
             ) : (
-              <div className='flex flex-col gap-2'>
+              <div className='flex flex-col gap-2 h-0 flex-grow overflow-y-auto'>
                 {admissions.map((admission) => (
                   <div
                     key={admission.id}
@@ -227,13 +264,9 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
-          <div className='border p-4 rounded-lg'>
-            <div className='flex items-center justify-between'>
-              <h3 className='font-semibold'>Notices</h3>
-              <Button variant='link' asChild>
-                <Link href='/dashboard/notices'>See more</Link>
-              </Button>
-            </div>
+          {/* Graph */}
+          <div className='w-full h-full'>
+            <MainChart data={chartAdmissions} />
           </div>
         </div>
       </div>

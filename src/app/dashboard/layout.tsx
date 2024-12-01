@@ -29,9 +29,11 @@ export default async function DashboardLayout({ children }: PropsWithChildren) {
   return (
     <div className='h-full bg-gray-100 w-full flex'>
       <Sidebar user={data} />
-      <main className='my-4 mr-4 p-4 border rounded-md w-full bg-white'>
-        {children}
-      </main>
+      <div className='p-4 w-full h-full'>
+        <main className='mr-4 relative p-4 overflow-x-auto h-full border rounded-md w-full bg-white'>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

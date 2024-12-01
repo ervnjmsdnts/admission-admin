@@ -124,6 +124,7 @@ export default function ApplicationsPage() {
         open={dialogType === 'exam'}
         onClose={closeDialog}
         admission={selectedAdmission}
+        isUpdate={!!selectedAdmission.examination}
       />
       <ApproveDialog
         open={dialogType === 'approve'}
@@ -135,14 +136,14 @@ export default function ApplicationsPage() {
         onClose={closeDialog}
         admission={selectedAdmission}
       />
-      <div className='flex flex-col h-full w-full gap-4'>
+      <div className='flex flex-col h-full w-full gap-4 overflow-x-auto'>
         {isLoading ? (
           <div className='flex justify-center items-center w-full h-full'>
             <Loader2 className='w-6 h-6 animate-spin' />
           </div>
         ) : (
           <>
-            <div className='flex flex-grow w-full h-full gap-2 flex-col'>
+            <div className='flex flex-grow w-full h-full gap-2 flex-col overflow-x-scroll'>
               <div className='flex justify-between'>
                 <Input
                   placeholder='Search by student name'
@@ -151,153 +152,160 @@ export default function ApplicationsPage() {
                   value={searchName}
                 />
               </div>
-              <div className='flex flex-col h-full'>
+              <div className='flex flex-col h-full w-full overflow-x-auto'>
                 <div className='border rounded-lg w-full h-0 flex-grow overflow-y-auto'>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Application</TableHead>
-                        <TableHead>Student Name</TableHead>
-                        <TableHead>Student Type</TableHead>
-                        <TableHead>Examination Schedule</TableHead>
-                        <TableHead>Examination Completion Date</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead className='text-center'>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {currentItems.map((admission) => (
-                        <TableRow key={admission.id}>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                admission.status === 'forReview'
-                                  ? 'pending'
-                                  : admission.status === 'onGoingExamination'
-                                  ? 'onGoing'
-                                  : admission.status === 'completeExamination'
-                                  ? 'complete'
-                                  : admission.status === 'approved'
-                                  ? 'default'
-                                  : admission.status === 'approvedExamination'
-                                  ? 'complete'
-                                  : 'destructive'
-                              }>
-                              {admission.status === 'forReview'
-                                ? 'For Review'
-                                : admission.status === 'onGoingExamination'
-                                ? 'On Going Exam'
-                                : admission.status === 'completeExamination'
-                                ? 'Exam Complete'
-                                : admission.status === 'approvedExamination'
-                                ? 'Exam Passed'
-                                : admission.status === 'rejectedExamination'
-                                ? 'Exam Unsuccessful'
-                                : admission.status.charAt(0).toUpperCase() +
-                                  admission.status.slice(1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              onClick={() => openDialog('admission', admission)}
-                              variant='outline'>
-                              View
-                            </Button>
-                          </TableCell>
-                          <TableCell>{admission.user.name}</TableCell>
-                          <TableCell>
-                            {admission.user.type === 'new'
-                              ? 'New Student'
-                              : admission.user.type === 'returning'
-                              ? 'Returning Student'
-                              : 'Transferee'}
-                          </TableCell>
-                          <TableCell>
-                            {admission.examination &&
-                            admission.examination.scheduleDate
-                              ? format(
-                                  new Date(admission.examination.scheduleDate),
-                                  'PPp',
-                                )
-                              : ''}
-                          </TableCell>
-                          <TableCell>
-                            {admission.examination &&
-                            admission.examination.completeExamDate
-                              ? format(
-                                  new Date(
-                                    admission.examination.completeExamDate,
-                                  ),
-                                  'PPp',
-                                )
-                              : ''}
-                          </TableCell>
-                          <TableCell>
-                            {format(new Date(admission.createdAt), 'PPpp')}
-                          </TableCell>
-                          <TableCell className='flex justify-center'>
-                            {admission.status === 'forReview' ? (
-                              <>
-                                <Button
-                                  onClick={() => openDialog('exam', admission)}
-                                  size='icon'
-                                  variant='ghost'>
-                                  <Newspaper className='w-4 h-4 text-primary' />
-                                </Button>
-                                <Button
-                                  onClick={() =>
-                                    openDialog('reject', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <X className='w-4 h-4 text-red-400' />
-                                </Button>
-                              </>
-                            ) : admission.status === 'completeExamination' ? (
-                              <>
-                                <Button
-                                  onClick={() =>
-                                    openDialog('approveExam', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <Check className='w-4 h-4 text-primary' />
-                                </Button>
-                                <Button
-                                  onClick={() =>
-                                    openDialog('rejectExam', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <X className='w-4 h-4 text-red-400' />
-                                </Button>
-                              </>
-                            ) : admission.status === 'approvedExamination' ? (
-                              <>
-                                <Button
-                                  onClick={() =>
-                                    openDialog('approve', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <Check className='w-4 h-4 text-primary' />
-                                </Button>
-                                <Button
-                                  onClick={() =>
-                                    openDialog('reject', admission)
-                                  }
-                                  size='icon'
-                                  variant='ghost'>
-                                  <X className='w-4 h-4 text-red-400' />
-                                </Button>
-                              </>
-                            ) : null}
-                          </TableCell>
+                  <div className='overflow-x-auto'>
+                    <Table className='min-w-[1200px] overflow-x-auto'>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className='w-[200px]'>Status</TableHead>
+                          <TableHead>Application</TableHead>
+                          <TableHead>Student Name</TableHead>
+                          <TableHead>Student Type</TableHead>
+                          <TableHead>Examination Schedule</TableHead>
+                          <TableHead>Examination Proof</TableHead>
+                          <TableHead>Examination Completion Date</TableHead>
+                          <TableHead>Created At</TableHead>
+                          <TableHead className='text-center'>Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {currentItems.map((admission) => (
+                          <TableRow key={admission.id}>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  admission.status === 'forReview'
+                                    ? 'pending'
+                                    : admission.status === 'onGoingExamination'
+                                    ? 'onGoing'
+                                    : admission.status === 'approved'
+                                    ? 'default'
+                                    : admission.status === 'approvedExamination'
+                                    ? 'complete'
+                                    : 'destructive'
+                                }>
+                                {admission.status === 'forReview'
+                                  ? 'For Review'
+                                  : admission.status === 'onGoingExamination'
+                                  ? 'Schedule of Exam'
+                                  : admission.status === 'approvedExamination'
+                                  ? 'Exam Passed'
+                                  : admission.status === 'rejectedExamination'
+                                  ? 'Exam Unsuccessful'
+                                  : admission.status.charAt(0).toUpperCase() +
+                                    admission.status.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                onClick={() =>
+                                  openDialog('admission', admission)
+                                }
+                                variant='outline'>
+                                View
+                              </Button>
+                            </TableCell>
+                            <TableCell>{admission.user.name}</TableCell>
+                            <TableCell>
+                              {admission.user.type === 'new'
+                                ? 'New Student'
+                                : admission.user.type === 'returning'
+                                ? 'Returning Student'
+                                : 'Transferee'}
+                            </TableCell>
+                            <TableCell>
+                              {admission.examination &&
+                              admission.examination.scheduleDate ? (
+                                <Button
+                                  className='p-0'
+                                  onClick={() => openDialog('exam', admission)}
+                                  variant='link'>
+                                  {format(
+                                    new Date(
+                                      admission.examination.scheduleDate,
+                                    ),
+                                    'PPp',
+                                  )}
+                                </Button>
+                              ) : (
+                                ''
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {admission.examination &&
+                              admission.examination?.ssProof ? (
+                                <Button asChild variant='link'>
+                                  <a
+                                    target='_blank'
+                                    href={admission.examination.ssProof}>
+                                    View
+                                  </a>
+                                </Button>
+                              ) : (
+                                ''
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {admission.examination &&
+                              admission.examination.completeExamDate
+                                ? format(
+                                    new Date(
+                                      admission.examination.completeExamDate,
+                                    ),
+                                    'PPp',
+                                  )
+                                : ''}
+                            </TableCell>
+                            <TableCell>
+                              {format(new Date(admission.createdAt), 'PPpp')}
+                            </TableCell>
+                            <TableCell className='flex justify-center'>
+                              {admission.status === 'forReview' ? (
+                                <>
+                                  <Button
+                                    onClick={() =>
+                                      openDialog('exam', admission)
+                                    }
+                                    size='icon'
+                                    variant='ghost'>
+                                    <Newspaper className='w-4 h-4 text-primary' />
+                                  </Button>
+                                  <Button
+                                    onClick={() =>
+                                      openDialog('reject', admission)
+                                    }
+                                    size='icon'
+                                    variant='ghost'>
+                                    <X className='w-4 h-4 text-red-400' />
+                                  </Button>
+                                </>
+                              ) : admission.status === 'approvedExamination' ? (
+                                <>
+                                  <Button
+                                    onClick={() =>
+                                      openDialog('approve', admission)
+                                    }
+                                    size='icon'
+                                    variant='ghost'>
+                                    <Check className='w-4 h-4 text-primary' />
+                                  </Button>
+                                  <Button
+                                    onClick={() =>
+                                      openDialog('reject', admission)
+                                    }
+                                    size='icon'
+                                    variant='ghost'>
+                                    <X className='w-4 h-4 text-red-400' />
+                                  </Button>
+                                </>
+                              ) : null}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
             </div>

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import useDialog from '@/hooks/use-dialog';
 import usePagination from '@/hooks/use-pagination';
-import { Loader2, Trash } from 'lucide-react';
+import { Loader2, Pencil, Trash } from 'lucide-react';
 import AddNoticeDialog from './_components/add-notice';
 import { useEffect, useState } from 'react';
 import { Notice } from '@/lib/types';
@@ -24,6 +24,7 @@ export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchName, setSearchName] = useState('');
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
     (() => {
@@ -68,9 +69,18 @@ export default function NoticesPage() {
     handleDelete,
   } = useDialog();
 
+  const handleClose = () => {
+    handleCloseAdd();
+    setSelectedNotice(null);
+  };
+
   return (
     <>
-      <AddNoticeDialog onClose={handleCloseAdd} open={openAdd} />
+      <AddNoticeDialog
+        notice={selectedNotice}
+        onClose={handleClose}
+        open={openAdd}
+      />
       <DeleteDialog
         open={openDelete}
         onClose={handleCloseDelete}
@@ -115,6 +125,15 @@ export default function NoticesPage() {
                           </TableCell>
                           <TableCell>
                             <div className='flex gap-2 justify-center items-center'>
+                              <Button
+                                size='icon'
+                                variant='ghost'
+                                onClick={() => {
+                                  handleOpenAdd();
+                                  setSelectedNotice(notice);
+                                }}>
+                                <Pencil className='w-4 h-4 text-blue-400' />
+                              </Button>
                               <Button
                                 onClick={() => handleOpenDelete(notice.id)}
                                 size='icon'

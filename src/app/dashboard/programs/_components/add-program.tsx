@@ -18,10 +18,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { db } from '@/lib/firebase';
+import { Program } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -32,25 +33,42 @@ type Schema = z.infer<typeof schema>;
 export default function AddProgramDialog({
   open,
   onClose,
+  program,
 }: {
   open: boolean;
   onClose: () => void;
+  program: Program | null;
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<Schema>({ resolver: zodResolver(schema) });
+  const form = useForm<Schema>({
+    resolver: zodResolver(schema),
+    values: useMemo(
+      () => ({
+        name: program ? program.name : '',
+      }),
+      [program],
+    ),
+  });
   const { toast } = useToast();
 
   const onHandleSubmit = async (data: Schema) => {
     try {
       setIsLoading(true);
-      await addDoc(collection(db, 'programs'), {
-        createdAt: new Date().getTime(),
-        name: data.name,
-      });
-      toast({
-        title: 'Successfully added program',
-      });
+      if (program) {
+        const docRef = doc(db, 'programs', `${program.id}`);
+        await updateDoc(docRef, { name: data.name });
+        toast({ title: 'Successfully updated program' });
+      } else {
+        await addDoc(collection(db, 'programs'), {
+          createdAt: new Date().getTime(),
+          name: data.name,
+          isActive: true,
+        });
+        toast({
+          title: 'Successfully added program',
+        });
+      }
       form.reset({ name: '' });
       onClose();
     } catch (error) {
@@ -64,7 +82,7 @@ export default function AddProgramDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Program</DialogTitle>
+          <DialogTitle>{program ? 'Edit' : 'Add'} Program</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form

@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import usePagination from '@/hooks/use-pagination';
-import { Loader2, Trash } from 'lucide-react';
+import { Loader2, Pencil, Trash } from 'lucide-react';
 import AddProgramDialog from './_components/add-program';
 import useDialog from '@/hooks/use-dialog';
 import DeleteDialog from '@/components/delete-dialog';
@@ -25,6 +25,7 @@ export default function ProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchName, setSearchName] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 
   useEffect(() => {
     (() => {
@@ -69,9 +70,18 @@ export default function ProgramsPage() {
     handleDelete,
   } = useDialog<Program>();
 
+  const handleClose = () => {
+    setSelectedProgram(null);
+    handleCloseAdd();
+  };
+
   return (
     <>
-      <AddProgramDialog open={openAdd} onClose={handleCloseAdd} />
+      <AddProgramDialog
+        open={openAdd}
+        onClose={handleClose}
+        program={selectedProgram}
+      />
       <DeleteDialog
         handleDelete={() => handleDelete('programs', 'program')}
         onClose={handleCloseDelete}
@@ -111,6 +121,15 @@ export default function ProgramsPage() {
                             {program.name}
                           </TableCell>
                           <TableCell className='flex justify-center'>
+                            <Button
+                              size='icon'
+                              variant='ghost'
+                              onClick={() => {
+                                handleOpenAdd();
+                                setSelectedProgram(program);
+                              }}>
+                              <Pencil className='w-4 h-4 text-blue-400' />
+                            </Button>
                             <Button
                               onClick={() => handleOpenDelete(program.id)}
                               size='icon'

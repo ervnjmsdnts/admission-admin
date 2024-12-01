@@ -112,6 +112,20 @@ type ParsedInputs = {
   [K in keyof Inputs['documents']]: string;
 };
 
+export type ChartType = {
+  name: string;
+  value: number;
+  fill?: string;
+};
+
+export type Status =
+  | 'forReview'
+  | 'rejected'
+  | 'approved'
+  | 'onGoingExamination'
+  | 'approvedExamination'
+  | 'rejectedExamination';
+
 export type Admission = {
   id: string;
   status:
@@ -119,7 +133,6 @@ export type Admission = {
     | 'rejected'
     | 'approved'
     | 'onGoingExamination'
-    | 'completeExamination'
     | 'approvedExamination'
     | 'rejectedExamination';
   userId: string;
@@ -128,6 +141,7 @@ export type Admission = {
     scheduleDate: number;
     examForm: string;
     completeExamDate?: number;
+    ssProof?: string;
   };
   form: Omit<Inputs, 'documents' | 'dateOfBirth'> & {
     documents: ParsedInputs;

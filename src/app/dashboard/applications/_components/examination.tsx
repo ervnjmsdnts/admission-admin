@@ -36,7 +36,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -51,15 +51,28 @@ export default function ExaminationDialog({
   open,
   onClose,
   admission,
+  isUpdate = false,
 }: {
   open: boolean;
   onClose: () => void;
   admission: AdmissionUser;
+  isUpdate?: boolean;
 }) {
   const [examinations, setExaminations] = useState<Examination[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const form = useForm<Schema>({ resolver: zodResolver(schema) });
+  const form = useForm<Schema>({
+    resolver: zodResolver(schema),
+    values: useMemo(
+      () => ({
+        dateOfExam: isUpdate
+          ? new Date(admission.examination!.scheduleDate)
+          : new Date(),
+        examForm: isUpdate ? admission.examination!.examForm : '',
+      }),
+      [isUpdate, admission.examination],
+    ),
+  });
 
   useEffect(() => {
     (() => {
@@ -93,6 +106,7 @@ export default function ExaminationDialog({
       await updateDoc(docRef, {
         status: 'onGoingExamination',
         examination: {
+          ...admission.examination,
           scheduleDate: data.dateOfExam.getTime(),
           examForm: data.examForm,
         },
@@ -125,7 +139,9 @@ export default function ExaminationDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Examination</DialogTitle>
+          <DialogTitle>
+            {isUpdate ? 'Update Examination Schedule' : 'Examination Schedule'}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
