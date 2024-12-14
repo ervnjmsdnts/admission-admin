@@ -124,6 +124,7 @@ export type Status =
   | 'approved'
   | 'onGoingExamination'
   | 'approvedExamination'
+  | 'completeExamination'
   | 'rejectedExamination';
 
 export type Admission = {

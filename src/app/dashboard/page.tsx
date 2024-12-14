@@ -155,6 +155,7 @@ export default function DashboardPage() {
         onGoingExamination: { name: 'onGoingExamination', value: 0 },
         approvedExamination: { name: 'approvedExamination', value: 0 },
         rejectedExamination: { name: 'rejectedExamination', value: 0 },
+        completeExamination: { name: 'completeExamination', value: 0 },
       },
     );
 
@@ -164,6 +165,7 @@ export default function DashboardPage() {
     record.onGoingExamination.fill = 'var(--color-onGoingExamination)';
     record.rejected.fill = 'var(--color-rejected)';
     record.rejectedExamination.fill = 'var(--color-rejectedExamination)';
+    record.completeExamination.fill = 'var(--color-completeExamination)';
 
     const data = Object.values(record);
 
