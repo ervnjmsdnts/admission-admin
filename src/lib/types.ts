@@ -134,6 +134,7 @@ export type Admission = {
     | 'approved'
     | 'onGoingExamination'
     | 'approvedExamination'
+    | 'completeExamination'
     | 'rejectedExamination';
   userId: string;
   createdAt: number;

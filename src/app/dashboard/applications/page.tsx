@@ -181,6 +181,8 @@ export default function ApplicationsPage() {
                                     ? 'onGoing'
                                     : admission.status === 'approved'
                                     ? 'default'
+                                    : admission.status === 'completeExamination'
+                                    ? 'default'
                                     : admission.status === 'approvedExamination'
                                     ? 'complete'
                                     : 'destructive'
@@ -191,6 +193,8 @@ export default function ApplicationsPage() {
                                   ? 'Schedule of Exam'
                                   : admission.status === 'approvedExamination'
                                   ? 'Exam Passed'
+                                  : admission.status === 'completeExamination'
+                                  ? 'Exam Complete'
                                   : admission.status === 'rejectedExamination'
                                   ? 'Exam Unsuccessful'
                                   : admission.status.charAt(0).toUpperCase() +
@@ -293,6 +297,25 @@ export default function ApplicationsPage() {
                                   <Button
                                     onClick={() =>
                                       openDialog('reject', admission)
+                                    }
+                                    size='icon'
+                                    variant='ghost'>
+                                    <X className='w-4 h-4 text-red-400' />
+                                  </Button>
+                                </>
+                              ) : admission.status === 'completeExamination' ? (
+                                <>
+                                  <Button
+                                    onClick={() =>
+                                      openDialog('approveExam', admission)
+                                    }
+                                    size='icon'
+                                    variant='ghost'>
+                                    <Check className='w-4 h-4 text-primary' />
+                                  </Button>
+                                  <Button
+                                    onClick={() =>
+                                      openDialog('rejectExam', admission)
                                     }
                                     size='icon'
                                     variant='ghost'>
