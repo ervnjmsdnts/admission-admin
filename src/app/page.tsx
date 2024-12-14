@@ -72,24 +72,32 @@ export default function Home() {
   };
 
   return (
-    <div className='bg-gray-100 h-full'>
-      <div className='flex items-center h-full justify-center'>
+    <div className='bg-gray-100 h-full bg-[url("/background-school.jpg")] bg-cover bg-no-repeat'>
+      <div className='fixed w-full h-full'>
+        <div className='h-full w-full bg-white absolute opacity-70' />
+      </div>
+
+      <div className='flex flex-col items-center relative z-10 h-full justify-center'>
+        <div className='grid place-items-center gap-2'>
+          <Image
+            src='/mindoro-school-logo.png'
+            width={100}
+            height={100}
+            alt='logo'
+          />
+          <h2 className='text-center text-2xl font-bold text-primary'>
+            Divine World College of San Jose
+          </h2>
+          <h2 className='text-center text-2xl font-bold text-primary'>
+            Enrollment System
+          </h2>
+        </div>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onHandleSubmit)}
-            className='bg-white p-4 rounded-lg max-w-md w-full'>
-            <div className='grid place-items-center gap-2'>
-              <Image
-                src='/mindoro-school-logo.png'
-                width={100}
-                height={100}
-                alt='logo'
-              />
-              <h2 className='text-center text-xl font-semibold text-primary'>
-                Admin Logins
-              </h2>
-            </div>
-            <div className='grid mt-4 gap-3'>
+            className='max-w-md w-full mt-8 bg-white rounded-lg p-4 '>
+            <h3 className='text-center text-lg font-semibold'>Admin Login</h3>
+            <div className='grid gap-3'>
               <FormField
                 control={form.control}
                 name='email'
