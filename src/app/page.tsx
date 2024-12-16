@@ -86,7 +86,7 @@ export default function Home() {
             alt='logo'
           />
           <h2 className='text-center text-2xl font-bold text-primary'>
-            Divine World College of San Jose
+            Divine Word College of San Jose
           </h2>
           <h2 className='text-center text-2xl font-bold text-primary'>
             Online Admission System
