@@ -89,7 +89,7 @@ export default function Home() {
             Divine World College of San Jose
           </h2>
           <h2 className='text-center text-2xl font-bold text-primary'>
-            Enrollment System
+            Online Admission System
           </h2>
         </div>
         <Form {...form}>
