@@ -92,7 +92,6 @@ export default function DashboardPage() {
       const admissionsQuery = query(
         collection(db, 'admissions'),
         orderBy('createdAt', 'desc'),
-        limit(10),
       ); // Add filters if necessary
 
       const unsubscribe = onSnapshot(
