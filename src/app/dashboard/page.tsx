@@ -3,13 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { db } from '@/lib/firebase';
-import { AdmissionUser, ChartType, Status, User } from '@/lib/types';
+import { AdmissionUser, ChartType, Program, Status, User } from '@/lib/types';
 import { format } from 'date-fns';
 import {
   collection,
   doc,
   getDoc,
-  limit,
   onSnapshot,
   orderBy,
   query,
@@ -19,11 +18,19 @@ import { ClipboardList, GraduationCap, Loader2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import MainChart from './applications/_components/main-chart';
+import { capitalizeFirstLetter, separateCapitals } from '@/lib/utils';
 
 export default function DashboardPage() {
   const [programsCount, setProgramsCount] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
   const [admissions, setAdmissions] = useState<AdmissionUser[]>([]);
+
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState('');
+
+  const [selectedUserType, setSelectedUserType] = useState('');
+
+  const [isPercent, setIsPercent] = useState(false);
 
   const [isLoading, setIsLoading] = useState({
     programs: true,
@@ -42,6 +49,14 @@ export default function DashboardPage() {
         programsQuery,
         (snapshot) => {
           const count = snapshot.size; // Directly get the count of active programs
+          const programs = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return { ...data, id: doc.id };
+          }) as Program[];
+          const sortedPrograms = programs.sort(
+            (a, b) => b.createdAt - a.createdAt,
+          );
+          setPrograms(sortedPrograms);
           setProgramsCount(count);
           setIsLoading((prev) => ({ ...prev, programs: false }));
         },
@@ -133,8 +148,32 @@ export default function DashboardPage() {
     };
   }, []);
 
+  const filteredAdmissions = admissions.filter(
+    (admission) =>
+      (!selectedProgram ||
+        admission.form.degree.desiredDegree === selectedProgram) &&
+      (!selectedUserType || admission.user.type === selectedUserType),
+  );
+
+  const csvData = useMemo(() => {
+    return filteredAdmissions.map((a) => ({
+      Name: a.user.name,
+      'Email Address': a.user.email,
+      'Student Type': capitalizeFirstLetter(a.user.type ?? ''),
+      'Addmission Status': separateCapitals(a.status),
+      'Addmission Created': format(a.createdAt, 'PPp'),
+      'Examination Completed Date': a.examination?.completeExamDate
+        ? format(a.examination.completeExamDate, 'PPp')
+        : null,
+    }));
+  }, [filteredAdmissions]);
+
+  const toggleValue = () => {
+    setIsPercent((prev) => !prev);
+  };
+
   const chartAdmissions = useMemo(() => {
-    const record = admissions.reduce<Record<Status, ChartType>>(
+    const record = filteredAdmissions.reduce<Record<Status, ChartType>>(
       (acc, item) => {
         if (!acc[item.status]) {
           acc[item.status] = {
@@ -166,10 +205,20 @@ export default function DashboardPage() {
     record.rejectedExamination.fill = 'var(--color-rejectedExamination)';
     record.completeExamination.fill = 'var(--color-completeExamination)';
 
-    const data = Object.values(record);
+    if (isPercent) {
+      const total = Object.values(record).reduce(
+        (sum, item) => sum + item.value,
+        0,
+      );
+      if (total > 0) {
+        Object.values(record).forEach((item) => {
+          item.value = Number(((item.value / total) * 100).toFixed(2));
+        });
+      }
+    }
 
-    return data;
-  }, [admissions]);
+    return Object.values(record);
+  }, [filteredAdmissions, isPercent]);
 
   return (
     <div className='flex flex-col h-full flex-grow w-full gap-4'>
@@ -267,7 +316,17 @@ export default function DashboardPage() {
           </div>
           {/* Graph */}
           <div className='w-full h-full'>
-            <MainChart data={chartAdmissions} />
+            <MainChart
+              csvData={csvData}
+              isPercent={isPercent}
+              toggleValue={toggleValue}
+              selectedUserType={selectedUserType}
+              setSelectedUserType={setSelectedUserType}
+              programs={programs}
+              selectedProgram={selectedProgram}
+              setSelectedProgram={setSelectedProgram}
+              data={chartAdmissions}
+            />
           </div>
         </div>
       </div>

@@ -15,8 +15,8 @@ import usePagination from '@/hooks/use-pagination';
 import { db } from '@/lib/firebase';
 import { AdmissionUser, User } from '@/lib/types';
 import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { Check, Loader2, Newspaper, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, Download, Loader2, Newspaper, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import ApproveDialog from './_components/approve';
@@ -37,9 +37,8 @@ type DialogType =
 
 export default function ApplicationsPage() {
   const [admissions, setAdmissions] = useState<AdmissionUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [admissionLoading, setAdmissionLoading] = useState(true);
   const [searchName, setSearchName] = useState('');
-
   const [dialogType, setDialogType] = useState<DialogType>(null);
   const [selectedAdmission, setSelectedAdmission] = useState<AdmissionUser>(
     {} as AdmissionUser,
@@ -86,7 +85,7 @@ export default function ApplicationsPage() {
         (a, b) => b.createdAt - a.createdAt,
       );
       setAdmissions(sortedAdmissions);
-      setIsLoading(false);
+      setAdmissionLoading(false);
     });
 
     return () => {
@@ -102,6 +101,8 @@ export default function ApplicationsPage() {
 
   const { currentItems, currentPage, paginate, totalPages } =
     usePagination(filteredAdmissions);
+
+  const isLoading = useMemo(() => admissionLoading, [admissionLoading]);
 
   return (
     <>

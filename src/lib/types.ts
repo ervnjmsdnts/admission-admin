@@ -92,6 +92,8 @@ export const FormDataSchema = z.object({
 
 export type Inputs = z.infer<typeof FormDataSchema>;
 
+export type UserType = 'new' | 'returning' | 'transferee';
+
 export type Program = {
   id: string;
   name: string;
@@ -105,7 +107,7 @@ export type User = {
   password: string;
   role: 'user' | 'admin';
   phoneNumber: string;
-  type?: 'new' | 'returning' | 'transferee';
+  type?: UserType;
 };
 
 type ParsedInputs = {
