@@ -146,6 +146,7 @@ export type Admission = {
     examForm: string;
     completeExamDate?: number;
     ssProof?: string;
+    ssReceipt: string;
   };
   form: Omit<Inputs, 'documents' | 'dateOfBirth'> & {
     documents: ParsedInputs;

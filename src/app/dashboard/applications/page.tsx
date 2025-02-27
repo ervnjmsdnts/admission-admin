@@ -164,7 +164,8 @@ export default function ApplicationsPage() {
                           <TableHead>Student Name</TableHead>
                           <TableHead>Student Type</TableHead>
                           <TableHead>Examination Schedule</TableHead>
-                          <TableHead>Examination Proof</TableHead>
+                          <TableHead>Exam Proof</TableHead>
+                          <TableHead>Exam Receipt</TableHead>
                           <TableHead>Examination Completion Date</TableHead>
                           <TableHead>Created At</TableHead>
                           <TableHead className='text-center'>Actions</TableHead>
@@ -244,6 +245,20 @@ export default function ApplicationsPage() {
                                   <a
                                     target='_blank'
                                     href={admission.examination.ssProof}>
+                                    View
+                                  </a>
+                                </Button>
+                              ) : (
+                                ''
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {admission.examination &&
+                              admission.examination?.ssReceipt ? (
+                                <Button asChild variant='link'>
+                                  <a
+                                    target='_blank'
+                                    href={admission.examination.ssReceipt}>
                                     View
                                   </a>
                                 </Button>
